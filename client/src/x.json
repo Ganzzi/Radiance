@@ -1,0 +1,48 @@
+[
+  {
+    "__v": 0,
+    "_id": "647ad20a6087e8bd31fc4724",
+    "bio": "I am user 123",
+    "blocker": [],
+    "blocking": [],
+    "createdAt": "1970-01-13T21:46:51.422Z",
+    "currentLocation": {
+      "latitude": 10.829464724702163,
+      "longitude": 106.67271589689359
+    },
+    "friendIds": ["647ad20a6087e8bd31fc4725"],
+    "friendRequestingIds": ["647ad20a6087e8bd31fc4724"],
+    "friendRequestorIds": ["647ad20a6087e8bd31fc4722"],
+    "gender": "female",
+    "interest": ["sports", "music"],
+    "messageRoomId": ["647ad20a6087e8bd31fc4726", "647ad20a6087e8bd31fc4727"],
+    "password": "$2b$10$SVA.qp1a5VV3V0mj7mloNOhmJc8qz7zgc7g8KLipCrShGo5UZbpDq",
+    "phoneNumber": "+840838897296",
+    "updatedAt": "2023-06-07T15:07:41.543Z",
+    "userPicture": "https://img.hoidap247.com/picture/question/20210904/large_1630765811060.jpg",
+    "username": "boiken123"
+  },
+  {
+    "__v": 0,
+    "_id": "647ad20a6087e8bd31fc4724",
+    "bio": "I am user 123",
+    "blocker": [],
+    "blocking": [],
+    "createdAt": "1970-01-13T21:46:51.422Z",
+    "currentLocation": {
+      "latitude": 10.829464724702163,
+      "longitude": 106.67271589689359
+    },
+    "friendIds": ["647ad20a6087e8bd31fc4725"],
+    "friendRequestingIds": ["647ad20a6087e8bd31fc4724"],
+    "friendRequestorIds": ["647ad20a6087e8bd31fc4722"],
+    "gender": "female",
+    "interest": ["sports", "music"],
+    "messageRoomId": ["647ad20a6087e8bd31fc4726", "647ad20a6087e8bd31fc4727"],
+    "password": "$2b$10$SVA.qp1a5VV3V0mj7mloNOhmJc8qz7zgc7g8KLipCrShGo5UZbpDq",
+    "phoneNumber": "+840838897296",
+    "updatedAt": "2023-06-07T15:09:58.617Z",
+    "userPicture": "https://img.hoidap247.com/picture/question/20210904/large_1630765811060.jpg",
+    "username": "boiken123"
+  }
+]
