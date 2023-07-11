@@ -9,54 +9,102 @@ import {
 import React, { useEffect, useState } from "react";
 import { useNavigation } from "@react-navigation/native";
 import { SafeAreaView } from "react-native-safe-area-context";
-import { getOtherUser } from "../../dummydata/response";
-import axiosClient from "../axios-client";
-import { useSelector } from "react-redux";
+import axiosClient from "../utils/axios-client.js";
+import { useDispatch, useSelector } from "react-redux";
 import { FontAwesome, Ionicons } from "@expo/vector-icons";
 import { ListWidget, SearchResutl } from "../components";
+import { setUserFriends } from "../state";
+import socket from "../utils/socket";
 
 const FriendScreen = () => {
   const navigation = useNavigation();
-  const { user, token } = useSelector((state) => state.state);
+  const { user, token, userFriends } = useSelector((state) => state.state);
 
-  const [userFriends, setUserFriends] = useState([]);
+  const dispatch = useDispatch();
+
+  // const [userFriends, setUserFriends] = useState([]);
   const [friendRequests, setFriendRequests] = useState([]);
   const [requestSents, setRequestSents] = useState([]);
 
   const [searchRequest, setsearchRequest] = useState("");
   const [searchResult, setsearchResult] = useState([]);
 
-  const handleAddOrCancelSuccess = async () => {
+  useEffect(() => {
+    handleSeachUser();
+  }, [userFriends, friendRequests, requestSents]);
+
+  useEffect(() => {
+    // fetchFriends();
+    fetchFriendRequests();
+    fetchRequestSents();
+  }, []);
+
+  useEffect(() => {
+    const handleUpdateRequest = async (data) => {
+      switch (data.type) {
+        case "remove":
+          await handleRemoveFriendSuccess();
+          break;
+        case "add":
+          await handleAcceptOrDeleteRequestSuccess(data.type);
+          break;
+        case "cancel":
+          await handleAcceptOrDeleteRequestSuccess(data.type);
+
+          break;
+        case "accept":
+          await handleAddOrCancelSuccess(data.type);
+
+          break;
+        case "delete":
+          await handleAddOrCancelSuccess(data.type);
+          break;
+        default:
+          break;
+      }
+    };
+
+    socket.on("request-added-cancelled", handleUpdateRequest);
+    socket.on("request-accepted-deleted", handleUpdateRequest);
+    socket.on("friend-removed", handleUpdateRequest);
+
+    // Clean up the event listener when the component unmounts
+    return () => {
+      socket.off("request-added-cancelled", handleUpdateRequest);
+      socket.off("request-accepted-deleted", handleUpdateRequest);
+      socket.off("friend-removed", handleUpdateRequest);
+    };
+  }, [socket]);
+
+  const handleAddOrCancelSuccess = async (type) => {
+    if (type == "accept") {
+      await fetchFriends();
+    }
     await fetchRequestSents();
   };
 
-  const handleRemoveFriendSuccess = async (type) => {
-    await fetchFriends();
-  };
-
   const handleAcceptOrDeleteRequestSuccess = async (type) => {
-    console.log("type: " + type);
     if (type == "accept") {
       await fetchFriends();
     }
     await fetchFriendRequests();
   };
 
-  useEffect(() => {
-    handleSeachUser();
-  }, [userFriends, friendRequests, requestSents]);
+  const handleRemoveFriendSuccess = async () => {
+    await fetchFriends();
+  };
 
   const fetchFriends = async () => {
     try {
       await axiosClient.get(`/user/${user._id}/friends`).then(({ data }) => {
-        setUserFriends(data);
+        dispatch(setUserFriends({ userFriends: data }));
       });
     } catch (error) {
       // Handle any errors
     }
   };
+
   const fetchFriendRequests = async () => {
-    console.log("request fetching");
     try {
       await axiosClient
         .get(`/user/${user._id}/friendRequests`)
@@ -78,12 +126,6 @@ const FriendScreen = () => {
       // Handle any errors
     }
   };
-
-  useEffect(() => {
-    fetchFriends();
-    fetchFriendRequests();
-    fetchRequestSents();
-  }, []);
 
   const handleSeachUser = async () => {
     let searchResponse = [];
@@ -176,7 +218,28 @@ const FriendScreen = () => {
           <SearchResutl
             searchResult={searchResult}
             user={user}
-            onUpdate={handleAddOrCancelSuccess}
+            onUpdate={async (type) => {
+              // console.log(type + " update");
+              switch (type) {
+                case "remove":
+                  await handleRemoveFriendSuccess();
+                  break;
+                case "add":
+                  await handleAddOrCancelSuccess();
+                  break;
+                case "cancel":
+                  await handleAddOrCancelSuccess();
+                  break;
+                case "accept":
+                  await handleAcceptOrDeleteRequestSuccess(type);
+                  break;
+                case "delete":
+                  await handleAcceptOrDeleteRequestSuccess(type);
+                  break;
+                default:
+                  break;
+              }
+            }}
           />
         )}
         <ListWidget

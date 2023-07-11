@@ -5,48 +5,43 @@ import {
   Image,
   TextInput,
   ScrollView,
-  Button,
 } from "react-native";
-import React, { useState } from "react";
+import React, { useEffect, useState } from "react";
 import { FontAwesome } from "@expo/vector-icons";
 import * as ImagePicker from "expo-image-picker";
 import * as ImageManipulator from "expo-image-manipulator";
 
-let INTERESTS = [
-  {
-    name: "sport",
-    isSelected: false,
-  },
-  {
-    name: "music",
-    isSelected: false,
-  },
-  {
-    name: "work",
-    isSelected: false,
-  },
-  {
-    name: "study",
-    isSelected: false,
-  },
-  {
-    name: "travel",
-    isSelected: false,
-  },
-];
+import Loading from "../Loading";
+import { INTERESTS } from "../../constants";
 
 const UpdateProfileModal = ({ user, onClose, onUpdate }) => {
-  for (let j = 0; j < INTERESTS.length; j++) {
-    if (user.interest.length != undefined) {
-      for (let i = 0; i < user.interest.length; i++) {
-        if (INTERESTS[j].name == user.interest[i]) {
-          INTERESTS[j].isSelected = true;
-        }
-      }
+  const [isLoading, setIsLoading] = useState(false);
+  const [interests, setInterests] = useState(INTERESTS);
+  const [image, setImage] = useState(null);
+  const [userData, setUserData] = useState({
+    photo: null,
+    username: user.username,
+    gender: user.gender,
+    bio: user.bio,
+    interests: user.interest,
+    userPicture: user.userPicture,
+  });
+
+  let columnData = [];
+  let column = [];
+  for (let i = 0; i < interests.length; i++) {
+    column.push(interests[i]);
+
+    if (column.length === 3 || i === interests.length - 1) {
+      columnData.push(column);
+      column = [];
     }
   }
 
-  const [interests, setInterests] = useState(INTERESTS);
+  useEffect(() => {
+    checkSelectedInterest();
+  }, []);
+
   const handleInterestPress = (name) => {
     const updatedInterests = interests.map((interest) =>
       interest.name === name
@@ -64,35 +59,22 @@ const UpdateProfileModal = ({ user, onClose, onUpdate }) => {
 
     handleInputChange("interests", selectedInterest);
   };
-  let columnData = [];
-  let column = [];
-  for (let i = 0; i < interests.length; i++) {
-    column.push(interests[i]);
 
-    if (column.length === 3 || i === interests.length - 1) {
-      columnData.push(column);
-      column = [];
+  const checkSelectedInterest = () => {
+    for (let j = 0; j < INTERESTS.length; j++) {
+      if (user.interest.length != undefined) {
+        for (let i = 0; i < user.interest.length; i++) {
+          if (INTERESTS[j].name == user.interest[i]) {
+            INTERESTS[j].isSelected = true;
+          }
+        }
+      }
     }
-  }
-
-  const [userData, setUserData] = useState({
-    photo: null,
-    username: user.username,
-    gender: user.gender,
-    bio: user.bio,
-    interests: user.interest,
-    userPicture: user.userPicture,
-  });
-
-  // const handleGenderSelect = (gender) => {
-  //   setUserData({ ...userData, gender: gender });
-  // };
+  };
 
   const handleInputChange = (key, value) => {
     setUserData({ ...userData, [key]: value });
   };
-
-  const [image, setImage] = useState(null);
 
   const pickImage = async () => {
     // No permissions request is necessary for launching the image library
@@ -121,6 +103,8 @@ const UpdateProfileModal = ({ user, onClose, onUpdate }) => {
 
       // Convert the image to base64
       let base64Img = `data:image/jpg;base64,${manipResult.base64}`;
+
+      console.log(base64Img);
 
       // console.log(base64Img);
 
@@ -260,11 +244,18 @@ const UpdateProfileModal = ({ user, onClose, onUpdate }) => {
 
         <TouchableOpacity
           className="absolute bottom-6 bg-purple-400 rounded-3xl px-5 py-2"
-          onPress={() => {
-            // console.log(userData);
-            onUpdate(userData);
+          onPress={async () => {
+            setIsLoading(true);
+
+            await onUpdate(userData);
+
+            setIsLoading(false);
           }}>
-          <Text className="text-3xl">Update</Text>
+          {isLoading ? (
+            <Loading color={"black"} size={35} />
+          ) : (
+            <Text className="text-3xl">Update</Text>
+          )}
         </TouchableOpacity>
       </View>
     </View>

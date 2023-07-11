@@ -7,14 +7,15 @@ import {
   MaterialIcons,
 } from "@expo/vector-icons";
 import Loading from "../Loading";
-import axiosClient from "../../axios-client";
+import axiosClient from "../../utils/axios-client.js";
+import socket from "../../utils/socket";
+import { useNavigation } from "@react-navigation/native";
 
 const Button = ({ state, onUpdate, item, user }) => {
   const [isLoading, setIsLoading] = useState(false);
+  const navigation = useNavigation();
 
   const handleFriendRequestOrCancel = async (friendId, type) => {
-    console.log("requesting...");
-    // console.log(friendId, user._id);
     try {
       await axiosClient
         .patch(`/user/${user._id}/${friendId}/sendOrCancelFriendRequest`, {
@@ -23,6 +24,11 @@ const Button = ({ state, onUpdate, item, user }) => {
         .then(async (response) => {
           if (response.status === 200) {
             await onUpdate(type);
+            socket.emit("add-cancel-request", {
+              from: user._id,
+              to: friendId,
+              type: type,
+            });
           } else {
             // Handle other response status codes
           }
@@ -33,7 +39,6 @@ const Button = ({ state, onUpdate, item, user }) => {
   };
 
   const handleAcceptOrDeleteRequest = async (friendId, type) => {
-    console.log("requesting...");
     try {
       await axiosClient
         .patch(`/user/${user._id}/${friendId}/acceptOrRemoveFriendRequest`, {
@@ -41,8 +46,13 @@ const Button = ({ state, onUpdate, item, user }) => {
         })
         .then(async (response) => {
           if (response.status === 200) {
-            console.log("success");
+            // console.log("success");
             await onUpdate(type);
+            socket.emit("accept-delete-request", {
+              from: user._id,
+              to: friendId,
+              type: type,
+            });
           } else {
             // Handle other response status codes
           }
@@ -53,14 +63,18 @@ const Button = ({ state, onUpdate, item, user }) => {
   };
 
   const handleRemoveFriend = async (friendId, type) => {
-    console.log("requesting...");
     try {
       await axiosClient
         .patch(`/user/${user._id}/${friendId}/removeFriend`)
         .then(async (response) => {
           if (response.status === 200) {
-            console.log("success");
+            // console.log("success");
             await onUpdate(type);
+            socket.emit("remove-friend", {
+              from: user._id,
+              to: friendId,
+              type: type,
+            });
           } else {
             // Handle other response status codes
           }
@@ -118,21 +132,23 @@ const Button = ({ state, onUpdate, item, user }) => {
                 onPress={async () => {
                   setIsLoading(true);
 
-                  await onUpdate("chat");
+                  navigation.navigate("MessageRoom", {
+                    otherId: item._id,
+                  });
 
                   setIsLoading(false);
                 }}>
                 <Ionicons name="chatbubble-ellipses" size={24} color="black" />
               </TouchableOpacity>
-              <TouchableOpacity
+              {/* <TouchableOpacity
                 className="rounded-2xl bg-yellow-300 p-2 mx-1"
                 onPress={async () => {
                   setIsLoading(true);
-                  await onUpdate("picture");
+                  
                   setIsLoading(false);
                 }}>
                 <FontAwesome name="file-picture-o" size={24} color="black" />
-              </TouchableOpacity>
+              </TouchableOpacity> */}
             </>
           )}
         </>

@@ -5,13 +5,16 @@ import cors from "cors";
 import dotenv from "dotenv";
 import helmet from "helmet";
 import morgan from "morgan";
+
 import authRoutes from "./routes/authRoutes.js";
 import userRoutes from "./routes/userRoutes.js";
 import pictureRoutes from "./routes/pictureRoutes.js";
+import messageRoutes from "./routes/messageRoute.js";
 import RadianceUser from "./models/User.js";
 import RadiancePicture from "./models/Picture.js";
 import RadianceMessageRoom from "./models/Message.js";
 import { users, messageRooms, pictures } from "./data/index.js";
+import { connectSocket } from "./utils/socket.js";
 
 /* CONFIGURATIONS */
 dotenv.config();
@@ -28,6 +31,7 @@ app.use(cors());
 app.use("/user", userRoutes);
 app.use("/auth", authRoutes);
 app.use("/pictures", pictureRoutes);
+app.use("/messages", messageRoutes);
 
 /* MONGOOSE SETUP */
 const PORT = process.env.PORT || 6001;
@@ -37,9 +41,11 @@ mongoose
     useUnifiedTopology: true,
   })
   .then(() => {
-    app.listen(PORT, () => console.log(`Server Port: ${PORT}`));
+    const server = app.listen(PORT, () => console.log(`Server Port: ${PORT}`));
 
-    /* ADD DATA ONE TIME */
+    connectSocket(server);
+
+    /* INSERT DATA INTO DATABASE */
     // RadianceUser.insertMany(users);
     // RadiancePicture.insertMany(pictures);
     // RadianceMessageRoom.insertMany(messageRooms);

@@ -1,7 +1,7 @@
 {
   "expo": {
-    "name": "react-native-app",
-    "slug": "react-native-app",
+    "name": "radiance-app",
+    "slug": "radiance-app",
     "version": "1.0.0",
     "orientation": "portrait",
     "icon": "./assets/icon.png",
@@ -13,12 +13,34 @@
     },
     "assetBundlePatterns": ["**/*"],
     "ios": {
-      "supportsTablet": true
+      "supportsTablet": true,
+      "infoPlist": {
+        "supportsTablet": true,
+        "UIBackgroundModes": ["location", "fetch"],
+        "NSLocationAlwaysAndWhenInUseUsageDescription": "Allow $(radiance-app) to use your location."
+      },
+      "bundleIdentifier": "com.ganzzi.radiance",
+      "config": {
+        "googleMapsApiKey": "AIzaSyDqerbVDuvKwh9gx_ExmxDECOYSeu8Atk4"
+      }
     },
     "android": {
       "adaptiveIcon": {
         "foregroundImage": "./assets/adaptive-icon.png",
         "backgroundColor": "#ffffff"
+      },
+      "permissions": [
+        "android.permission.RECORD_AUDIO",
+        "android.permission.ACCESS_COARSE_LOCATION",
+        "android.permission.ACCESS_FINE_LOCATION",
+        "android.permission.FOREGROUND_SERVICE",
+        "android.permission.ACCESS_BACKGROUND_LOCATION",
+        "android.permission.CAMERA"
+      ],
+      "config": {
+        "googleMaps": {
+          "apiKey": "AIzaSyCq_w2ahszFU2QsCa1hz2eJnzzRpEJF1Xg"
+        }
       }
     },
     "web": {
@@ -30,7 +52,26 @@
         {
           "photosPermission": "The app accesses your photos to let you share them with your friends."
         }
+      ],
+      [
+        "expo-location",
+        {
+          "isIosBackgroundLocationEnabled": true,
+          "isAndroidBackgroundLocationEnabled": true,
+          "locationAlwaysAndWhenInUsePermission": "Allow $(radiance-app) to use your location."
+        }
+      ],
+      [
+        "expo-camera",
+        {
+          "cameraPermission": "Allow $(radiance-app) to access your camera."
+        }
       ]
-    ]
+    ],
+    "extra": {
+      "eas": {
+        "projectId": "4398be2d-3516-4588-b14d-d1ddd9364382"
+      }
+    }
   }
 }

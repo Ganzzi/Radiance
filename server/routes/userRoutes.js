@@ -2,13 +2,11 @@ import express from "express";
 import {
   getUser,
   getUserFriends,
-  getUserPictures,
-  getMessageRooms,
   sendOrCancelFriendRequest,
   acceptOrRemoveFriendRequest,
   updateUserProfile,
   updateLocation,
-  blockOrUnblock,
+  // blockOrUnblock,
   removeFriend,
   deleteUser,
   getFriendRequests,
@@ -21,11 +19,9 @@ const router = express.Router();
 
 /* READ */
 router.get("/:userId", verifyToken, getUser);
-router.get("/:userId/pictures", verifyToken, getUserPictures);
 router.get("/:userId/friends", verifyToken, getUserFriends);
 router.get("/:userId/friendRequests", verifyToken, getFriendRequests);
 router.get("/:userId/requestSents", verifyToken, getRequestSents);
-router.get("/:userId/messageRooms", verifyToken, getMessageRooms);
 
 /* CREATE */
 router.post("/searchUser", verifyToken, getUserSearchResult);
@@ -45,7 +41,7 @@ router.patch(
 router.patch("/:userId/:friendId/removeFriend", verifyToken, removeFriend);
 
 router.patch("/:userId/updateLocation", verifyToken, updateLocation);
-router.patch("/:userId/:otherId/blockOrUnblock", verifyToken, blockOrUnblock);
+// router.patch("/:userId/:otherId/blockOrUnblock", verifyToken, blockOrUnblock);
 
 /* DELETE */
 router.delete("/:userId/remove", verifyToken, deleteUser);

@@ -1,84 +1,104 @@
-import React, { useState } from "react";
-import { Image } from "react-native";
-import MapView, { Marker } from "react-native-maps";
-import { useSelector } from "react-redux";
+import React, { useEffect, useState } from "react";
+import { Image, Platform } from "react-native";
+import MapView, { Marker, PROVIDER_GOOGLE } from "react-native-maps";
+import { useDispatch, useSelector } from "react-redux";
+import socket from "../../utils/socket";
+import { setUserFriends } from "../../state";
 
-const Map = ({
-  i,
-  data,
-  isUserLocation,
-  setIsUserLocation,
-  setIsPictureLocation,
-  isPictureLocation,
-}) => {
-  const { user, token } = useSelector((state) => state.state);
+const Map = ({ mapRef, data, currentLocation }) => {
+  const { user, userFriends } = useSelector((state) => state.state);
+  const dispatch = useDispatch();
 
   const initialRegion = {
-    latitude: user.currentLocation.latitude - 0.005 || 100,
-    longitude: user.currentLocation.longitude || 100,
-    latitudeDelta: 0.015,
-    longitudeDelta: 0.015,
+    latitude: currentLocation.latitude,
+    longitude: currentLocation.longitude,
+    latitudeDelta: currentLocation.latitudeDelta,
+    longitudeDelta: currentLocation.longitudeDelta,
   };
 
-  const region = isUserLocation
-    ? initialRegion
-    : isPictureLocation && {
-        latitude: data[i]?.location.latitude - 0.005,
-        longitude: data[i]?.location.longitude,
-        latitudeDelta: 0.015,
-        longitudeDelta: 0.015,
-      };
+  useEffect(() => {
+    const handleReceiveLocation = (data) => {
+      const updatedUserFriends = userFriends.map((friend) => {
+        if (friend._id == data.userId) {
+          const fr = {
+            ...friend,
+            currentLocation: data.location,
+          };
+          return fr;
+        }
+        return friend;
+      });
 
-  // console.log("rg");
-  // console.log(region);
-  // console.log(user);
+      dispatch(setUserFriends({ userFriends: updatedUserFriends }));
+    };
+
+    socket.on("location-update", handleReceiveLocation);
+
+    // Clean up the event listener when the component unmounts
+    return () => {
+      socket.off("location-update", handleReceiveLocation);
+    };
+  }, [socket]);
 
   return (
     <MapView
+      provider={Platform.OS == "android" ? PROVIDER_GOOGLE : undefined}
+      ref={mapRef}
       initialRegion={initialRegion}
-      region={region || null}
       className="flex-1 -mt-10 z-0"
-      onRegionChange={(rg) => {
-        if (rg != region) {
-          setIsUserLocation(false);
-          setIsPictureLocation(false);
-        }
-      }}
-      // customMapStyle={mapStyle}
       mapType="terrain">
-      {data.map((pic) => (
-        <Marker
-          coordinate={{
-            latitude: pic?.location.latitude,
-            longitude: pic?.location.longitude,
-          }}
-          pinColor
-          key={pic._id}>
-          <Image
-            source={{
-              uri: pic?.pictureUrl,
+      {/* pictures */}
+      {data &&
+        data.map((pic) => (
+          <Marker
+            coordinate={{
+              latitude: pic?.location.latitude,
+              longitude: pic?.location.longitude,
             }}
-            style={{ width: 40, height: 40 }}
-            className="rounded-2xl "
-          />
-        </Marker>
-      ))}
+            pinColor
+            key={pic._id}>
+            <Image
+              source={{
+                uri: pic?.pictureUrl,
+              }}
+              style={{ width: 40, height: 40 }}
+              className="rounded-full"
+            />
+          </Marker>
+        ))}
+
+      {userFriends &&
+        userFriends.map((friend) => (
+          <Marker
+            coordinate={{
+              latitude: friend.currentLocation.latitude,
+              longitude: friend.currentLocation.longitude,
+            }}
+            pinColor
+            key={friend._id}>
+            <Image
+              source={{
+                uri: friend?.userPicture,
+              }}
+              style={{ width: 40, height: 40 }}
+              className="rounded-full"
+            />
+          </Marker>
+        ))}
 
       {/* current user's location */}
       <Marker
         coordinate={{
-          latitude: user.currentLocation?.latitude,
-          longitude: user.currentLocation?.longitude,
+          latitude: currentLocation?.latitude,
+          longitude: currentLocation?.longitude,
         }}
         pinColor>
         <Image
           source={{
-            uri:
-              user.userPicture ||
-              "https://img.hoidap247.com/picture/question/20210904/large_1630765811060.jpg",
+            uri: user.userPicture,
           }}
           style={{ width: 40, height: 40 }}
-          className="rounded-2xl "
+          className="rounded-full"
         />
       </Marker>
     </MapView>
@@ -90,160 +110,11 @@ const mapStyle = [
     elementType: "geometry",
     stylers: [
       {
-        color: "#ebe3cd",
+        color: "#212121",
       },
     ],
   },
   {
-    elementType: "labels.text.fill",
-    stylers: [
-      {
-        color: "#523735",
-      },
-    ],
-  },
-  {
-    elementType: "labels.text.stroke",
-    stylers: [
-      {
-        color: "#f5f1e6",
-      },
-    ],
-  },
-  {
-    featureType: "administrative",
-    elementType: "geometry.stroke",
-    stylers: [
-      {
-        color: "#c9b2a6",
-      },
-    ],
-  },
-  {
-    featureType: "administrative.country",
-    elementType: "geometry.stroke",
-    stylers: [
-      {
-        visibility: "on",
-      },
-    ],
-  },
-  {
-    featureType: "administrative.land_parcel",
-    elementType: "geometry.stroke",
-    stylers: [
-      {
-        color: "#dcd2be",
-      },
-    ],
-  },
-  {
-    featureType: "administrative.land_parcel",
-    elementType: "labels.text.fill",
-    stylers: [
-      {
-        color: "#ae9e90",
-      },
-    ],
-  },
-  {
-    featureType: "administrative.neighborhood",
-    stylers: [
-      {
-        visibility: "off",
-      },
-    ],
-  },
-  {
-    featureType: "landscape.natural",
-    elementType: "geometry",
-    stylers: [
-      {
-        color: "#dfd2ae",
-      },
-    ],
-  },
-  {
-    featureType: "poi",
-    elementType: "geometry",
-    stylers: [
-      {
-        color: "#dfd2ae",
-      },
-    ],
-  },
-  {
-    featureType: "poi",
-    elementType: "labels.text",
-    stylers: [
-      {
-        visibility: "off",
-      },
-    ],
-  },
-  {
-    featureType: "poi",
-    elementType: "labels.text.fill",
-    stylers: [
-      {
-        color: "#93817c",
-      },
-    ],
-  },
-  {
-    featureType: "poi.business",
-    stylers: [
-      {
-        visibility: "off",
-      },
-    ],
-  },
-  {
-    featureType: "poi.park",
-    elementType: "geometry.fill",
-    stylers: [
-      {
-        color: "#a5b076",
-      },
-    ],
-  },
-  {
-    featureType: "poi.park",
-    elementType: "labels.text.fill",
-    stylers: [
-      {
-        color: "#447530",
-      },
-    ],
-  },
-  {
-    featureType: "road",
-    stylers: [
-      {
-        visibility: "off",
-      },
-    ],
-  },
-  {
-    featureType: "road",
-    elementType: "geometry",
-    stylers: [
-      {
-        color: "#f5f1e6",
-      },
-    ],
-  },
-  {
-    featureType: "road",
-    elementType: "labels",
-    stylers: [
-      {
-        visibility: "off",
-      },
-    ],
-  },
-  {
-    featureType: "road",
     elementType: "labels.icon",
     stylers: [
       {
@@ -252,11 +123,116 @@ const mapStyle = [
     ],
   },
   {
+    elementType: "labels.text.fill",
+    stylers: [
+      {
+        color: "#757575",
+      },
+    ],
+  },
+  {
+    elementType: "labels.text.stroke",
+    stylers: [
+      {
+        color: "#212121",
+      },
+    ],
+  },
+  {
+    featureType: "administrative",
+    elementType: "geometry",
+    stylers: [
+      {
+        color: "#757575",
+      },
+    ],
+  },
+  {
+    featureType: "administrative.country",
+    elementType: "labels.text.fill",
+    stylers: [
+      {
+        color: "#9e9e9e",
+      },
+    ],
+  },
+  {
+    featureType: "administrative.land_parcel",
+    stylers: [
+      {
+        visibility: "off",
+      },
+    ],
+  },
+  {
+    featureType: "administrative.locality",
+    elementType: "labels.text.fill",
+    stylers: [
+      {
+        color: "#bdbdbd",
+      },
+    ],
+  },
+  {
+    featureType: "poi",
+    elementType: "labels.text.fill",
+    stylers: [
+      {
+        color: "#757575",
+      },
+    ],
+  },
+  {
+    featureType: "poi.park",
+    elementType: "geometry",
+    stylers: [
+      {
+        color: "#181818",
+      },
+    ],
+  },
+  {
+    featureType: "poi.park",
+    elementType: "labels.text.fill",
+    stylers: [
+      {
+        color: "#616161",
+      },
+    ],
+  },
+  {
+    featureType: "poi.park",
+    elementType: "labels.text.stroke",
+    stylers: [
+      {
+        color: "#1b1b1b",
+      },
+    ],
+  },
+  {
+    featureType: "road",
+    elementType: "geometry.fill",
+    stylers: [
+      {
+        color: "#2c2c2c",
+      },
+    ],
+  },
+  {
+    featureType: "road",
+    elementType: "labels.text.fill",
+    stylers: [
+      {
+        color: "#8a8a8a",
+      },
+    ],
+  },
+  {
     featureType: "road.arterial",
     elementType: "geometry",
     stylers: [
       {
-        color: "#fdfcf8",
+        color: "#373737",
       },
     ],
   },
@@ -265,16 +241,7 @@ const mapStyle = [
     elementType: "geometry",
     stylers: [
       {
-        color: "#f8c967",
-      },
-    ],
-  },
-  {
-    featureType: "road.highway",
-    elementType: "geometry.stroke",
-    stylers: [
-      {
-        color: "#e9bc62",
+        color: "#3c3c3c",
       },
     ],
   },
@@ -283,16 +250,7 @@ const mapStyle = [
     elementType: "geometry",
     stylers: [
       {
-        color: "#e98d58",
-      },
-    ],
-  },
-  {
-    featureType: "road.highway.controlled_access",
-    elementType: "geometry.stroke",
-    stylers: [
-      {
-        color: "#db8555",
+        color: "#4e4e4e",
       },
     ],
   },
@@ -301,69 +259,25 @@ const mapStyle = [
     elementType: "labels.text.fill",
     stylers: [
       {
-        color: "#806b63",
+        color: "#616161",
       },
     ],
   },
   {
     featureType: "transit",
-    stylers: [
-      {
-        visibility: "off",
-      },
-    ],
-  },
-  {
-    featureType: "transit.line",
-    elementType: "geometry",
-    stylers: [
-      {
-        color: "#dfd2ae",
-      },
-    ],
-  },
-  {
-    featureType: "transit.line",
     elementType: "labels.text.fill",
     stylers: [
       {
-        color: "#8f7d77",
+        color: "#757575",
       },
     ],
   },
   {
-    featureType: "transit.line",
-    elementType: "labels.text.stroke",
-    stylers: [
-      {
-        color: "#ebe3cd",
-      },
-    ],
-  },
-  {
-    featureType: "transit.station",
+    featureType: "water",
     elementType: "geometry",
     stylers: [
       {
-        color: "#dfd2ae",
-      },
-    ],
-  },
-  {
-    featureType: "water",
-    elementType: "geometry.fill",
-    stylers: [
-      {
-        color: "#b9d3c2",
-      },
-    ],
-  },
-  {
-    featureType: "water",
-    elementType: "labels.text",
-    stylers: [
-      {
-        visibility: "off",
+        color: "#000000",
       },
     ],
   },
@@ -372,7 +286,7 @@ const mapStyle = [
     elementType: "labels.text.fill",
     stylers: [
       {
-        color: "#92998d",
+        color: "#3d3d3d",
       },
     ],
   },

@@ -4,9 +4,11 @@ const commentSchema = new mongoose.Schema(
   {
     text: {
       type: String,
+      required: true,
     },
     commenterId: {
       type: String,
+      required: true,
     },
   },
   { timestamps: true }
@@ -40,11 +42,10 @@ const pictureSchema = new mongoose.Schema(
       of: {
         type: {
           type: String,
-          // enum: ["like", "dislike"],
         },
         createdAt: {
           type: Date,
-          default: Date.now,
+          default: Date.now(),
         },
       },
       default: {},

@@ -3,7 +3,9 @@ import React, { useEffect, useState } from "react";
 import { SafeAreaView } from "react-native";
 import { CheckPhone, SignUpOrLogIn } from "../components";
 import { useNavigation } from "@react-navigation/native";
-import { useSelector } from "react-redux";
+import { useDispatch, useSelector } from "react-redux";
+import AsyncStorage from "@react-native-async-storage/async-storage";
+import { setLogin } from "../state";
 
 const LoginScreen = () => {
   const [phone, setPhone] = useState("");
@@ -14,11 +16,40 @@ const LoginScreen = () => {
 
   const { token, user } = useSelector((state) => state.state);
   const navigation = useNavigation();
+  const dispatch = useDispatch();
 
   useEffect(() => {
-    if (token) {
-      navigation.navigate("Home");
-    }
+    const checkLoggin = () => {
+      if (token) {
+        setFormattedValue("");
+        setValue("");
+        setPhoneExist(false);
+        setIsCheckPhone(true);
+        navigation.navigate("Home");
+      }
+    };
+
+    checkLoggin();
+  }, [token]);
+
+  useEffect(() => {
+    const retrieveUserData = async () => {
+      try {
+        const token = await AsyncStorage.getItem("ACCESS_TOKEN");
+        const userjson = await AsyncStorage.getItem("CURRENT_USER");
+        const user = JSON.parse(userjson);
+
+        if (token && user) {
+          dispatch(setLogin({ token: token, user: user }));
+        } else {
+          // navigation.navigate("Login");
+        }
+      } catch (error) {
+        console.log(error);
+      }
+    };
+
+    retrieveUserData();
   }, [token]);
 
   const setPhoneNumber = (ph) => {
@@ -31,7 +62,7 @@ const LoginScreen = () => {
   };
 
   return (
-    <SafeAreaView className="flex-1 items-center justify-center space-x-1">
+    <SafeAreaView className="flex-1 items-center justify-center bg-black">
       {isCheckPhone ? (
         <CheckPhone
           value={value}

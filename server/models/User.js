@@ -35,15 +35,15 @@ const userSchema = new mongoose.Schema(
     },
     bio: String,
     interest: [String],
-    blocking: {
-      type: Array,
-      default: [],
-    },
-    blocker: {
-      type: Array,
-      default: [],
-    },
-    messageRoomId: [String],
+    // blocking: {
+    //   type: Array,
+    //   default: [],
+    // },
+    // blocker: {
+    //   type: Array,
+    //   default: [],
+    // },
+    // messageRoomId: [String],
     friendRequestorIds: {
       type: Array,
       default: [],

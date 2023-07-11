@@ -7,8 +7,11 @@ import {
   MaterialIcons,
 } from "@expo/vector-icons";
 import Button from "./Button";
+import { useNavigation } from "@react-navigation/native";
 
 const ListWidget = ({ data, state, onUpdate, user }) => {
+  const navigation = useNavigation();
+
   return (
     <View className="w-4/5 flex-col justify-center items-start space-y-3 my-5">
       {state == "friend" && <Text>Your Friend</Text>}
@@ -19,7 +22,14 @@ const ListWidget = ({ data, state, onUpdate, user }) => {
           data.map((item, index) => (
             <View className="w-full flex-row items-center my-1" key={index}>
               <View className="flex-1 justify-start items-start">
-                <TouchableOpacity className=" flex-row justify-start items-start space-x-2">
+                <TouchableOpacity
+                  className=" flex-row justify-start items-start space-x-2"
+                  onPress={() => {
+                    console.log("navigating..");
+                    navigation.navigate("Profile", {
+                      otherId: item._id,
+                    });
+                  }}>
                   <Image
                     source={{
                       uri: item.userPicture,

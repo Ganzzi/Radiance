@@ -3,13 +3,6 @@ import Picture from "../models/Picture.js";
 import Message from "../models/Message.js";
 import { v2 as cloudinary } from "cloudinary";
 
-// cloudinary.config({
-//   cloud_name: "dmb3vegiw",
-//   api_key: "668977139884315",
-//   api_secret: "vZQijAc4jYkGsQfsJlnar5bjv0Y",
-//   secure: true,
-// });
-
 /* READ */
 export const getUserSearchResult = async (req, res) => {
   const { searchRequest } = req.body;
@@ -58,9 +51,7 @@ export const getUserFriends = async (req, res) => {
         return {
           _id,
           username,
-          userPicture:
-            userPicture ||
-            "https://img.hoidap247.com/picture/question/20210904/large_1630765811060.jpg",
+          userPicture,
           currentLocation,
         };
       }
@@ -85,13 +76,13 @@ export const getFriendRequests = async (req, res) => {
 
     // format user's friend
     const formattedFriends = friends.map(({ _id, username, userPicture }) => {
-      return {
-        _id,
-        username,
-        userPicture:
-          userPicture ||
-          "https://img.hoidap247.com/picture/question/20210904/large_1630765811060.jpg",
-      };
+      return _id
+        ? {
+            _id,
+            username,
+            userPicture,
+          }
+        : {};
     });
 
     res.status(200).json(formattedFriends);
@@ -130,102 +121,11 @@ export const getRequestSents = async (req, res) => {
   }
 };
 
-export const getUserPictures = async (req, res) => {
-  try {
-    const userId = req.params.userId;
-
-    const user = await User.findById(userId);
-
-    const meAndMyFriends = [...user.friendIds, userId];
-
-    const picturesPromises = meAndMyFriends.map((_id) =>
-      Picture.find({ takerId: _id })
-    );
-
-    const picturesResults = await Promise.allSettled(picturesPromises);
-
-    const pictures = picturesResults
-      .filter((result) => result.status === "fulfilled")
-      .map((result) => result.value)
-      .flat();
-
-    // format user's friend
-    const formattedPictures = await Promise.all(
-      pictures.map(async (pic) => {
-        const taker = await User.findById(pic.takerId);
-
-        return {
-          location: pic.location,
-          reactions: pic.reactions,
-          _id: pic._id,
-          pictureUrl: pic.pictureUrl,
-          takerId: pic.takerId,
-          createdAt: pic.createdAt,
-          updatedAt: pic.updatedAt,
-          comments: pic.comments,
-          takerName: taker.username,
-          takerPicture:
-            taker.userPicture ||
-            "https://img.hoidap247.com/picture/question/20210904/large_1630765811060.jpg",
-        };
-      })
-    );
-
-    res.status(200).json({ pictures: formattedPictures });
-  } catch (error) {
-    res.status(204).json({ message: error.message });
-  }
-};
-
-export const getMessageRooms = async (req, res) => {
-  try {
-    const userId = req.params.userId;
-
-    // const user = await User.findById(userId);
-
-    const messages = await Message.find({ users: userId });
-
-    const formattedMessageRooms = await Promise.all(
-      messages.map(async (room) => {
-        const updatedUsers = await Promise.all(
-          room.users.map(async (_id) => {
-            if (_id !== userId) {
-              const theOther = await User.findById(_id);
-              return {
-                _id: theOther._id,
-                username: theOther.username,
-                userPicture: theOther.userPicture,
-              };
-            } else {
-              return null;
-            }
-          })
-        );
-
-        // Filter out null values from the updatedUsers array
-        const filteredUsers = updatedUsers.filter((user) => user !== null);
-
-        return {
-          _id: room._id,
-          users: filteredUsers,
-          messages: room.messages,
-        };
-      })
-    );
-    // console.log(formattedMessageRooms);
-    res.status(200).json(formattedMessageRooms);
-  } catch (error) {
-    res.status(204).json({ message: error.message });
-  }
-};
-
 /* CREATE */
 
 export const sendOrCancelFriendRequest = async (req, res) => {
   const { userId, friendId } = req.params;
   const { type } = req.body;
-
-  console.log(type);
 
   try {
     if (type == "add") {
@@ -297,13 +197,11 @@ export const acceptOrRemoveFriendRequest = async (req, res) => {
       if (type == "delete") {
         message = "Friend request deleted successfully.";
       }
-      console.log(message);
       res.status(200).json({ message: message });
     } else {
       if (type == "delete") {
         message = "Friend request deletion failed.";
       }
-      console.log(message);
       res.status(404).json({ error: message });
     }
   } catch (error) {
@@ -323,7 +221,9 @@ export const updateUserProfile = async (req, res) => {
     let photoUrl = null;
 
     try {
-      photoUrl = (await cloudinary.uploader.upload(photo)).url;
+      if (photo) {
+        photoUrl = (await cloudinary.uploader.upload(photo)).url;
+      }
     } catch (error) {
       console.log(error);
     }
@@ -355,7 +255,26 @@ export const updateUserProfile = async (req, res) => {
   }
 };
 
-export const updateLocation = async (req, res) => {};
+export const updateLocation = async (req, res) => {
+  const { userId } = req.params;
+  const { currentLocation } = req.body;
+
+  try {
+    const user = await User.findByIdAndUpdate(userId, {
+      currentLocation: currentLocation,
+    });
+
+    if (user) {
+      res.status(200).json({ message: "Location updated" });
+    } else {
+      res.status(404).json({ error: "User not found" });
+    }
+  } catch (error) {
+    res.status(500).json({
+      error: "An error occurred while updating the location.",
+    });
+  }
+};
 
 export const removeFriend = async (req, res) => {
   const { userId, friendId } = req.params;
@@ -383,4 +302,56 @@ export const blockOrUnblock = async (req, res) => {};
 
 /* DELETE */
 
-export const deleteUser = async (req, res) => {};
+export const deleteUser = async (req, res) => {
+  const { userId } = req.params;
+
+  try {
+    // Delete pictures with takerId equal to userId
+    await Picture.deleteMany({ takerId: userId });
+
+    // Delete messages with userId in users array
+    await Message.deleteMany({ users: userId });
+
+    const user = await User.findById(userId);
+
+    if (!user) {
+      // User not found
+      return { success: false, message: "User not found." };
+    }
+
+    // Delete all related data
+    const deletedRelationship = await Promise.all([
+      // Delete friend requests sent by the user
+      User.updateMany(
+        { _id: { $in: user.friendRequestingIds } },
+        { $pull: { friendRequestorIds: userId } }
+      ),
+
+      // Delete friend requests received by the user
+      User.updateMany(
+        { _id: { $in: user.friendRequestorIds } },
+        { $pull: { friendRequestingIds: userId } }
+      ),
+
+      // Delete friendships
+      User.updateMany(
+        { _id: { $in: user.friendIds } },
+        { $pull: { friendIds: userId } }
+      ),
+    ]);
+
+    if (deletedRelationship) {
+      // Delete the user
+      await User.findByIdAndDelete(user._id);
+
+      res.status(202).json({
+        success: true,
+        message: "User and related data deleted successfully.",
+      });
+    }
+  } catch (error) {
+    res.status(500).json({
+      error: "An error occurred while processing user deleting.",
+    });
+  }
+};

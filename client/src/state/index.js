@@ -1,14 +1,9 @@
 import { createSlice } from "@reduxjs/toolkit";
-// import {login_request} from '../../dummydata/response';
 
 const initialState = {
   token: null,
-  user: {
-    currentLocation: {
-      longitude: 106.67271589689359,
-      latitude: 10.829464724702163,
-    },
-  },
+  user: {},
+  userFriends: [],
 };
 
 export const stateSlice = createSlice({
@@ -24,17 +19,16 @@ export const stateSlice = createSlice({
     },
     setLogout: (state) => {
       state.token = null;
-      state.user = {
-        currentLocation: {
-          longitude: 106.67271589689359,
-          latitude: 10.829464724702163,
-        },
-      };
+      state.user = {};
+    },
+    setUserFriends: (state, action) => {
+      state.userFriends = action.payload.userFriends;
     },
   },
 });
 
 // Action creators are generated for each case reducer function
-export const { setLogout, setLogin, setUser } = stateSlice.actions;
+export const { setLogout, setLogin, setUser, setUserFriends } =
+  stateSlice.actions;
 
 export default stateSlice.reducer;

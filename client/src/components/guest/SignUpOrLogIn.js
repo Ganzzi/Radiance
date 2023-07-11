@@ -1,29 +1,31 @@
 import {
   View,
   Text,
-  SafeAreaView,
   TextInput,
   TouchableOpacity,
   Pressable,
+  KeyboardAvoidingView,
+  Platform,
 } from "react-native";
 import React, { useEffect, useRef, useState } from "react";
 import { useNavigation } from "@react-navigation/native";
 import SelectDropdown from "react-native-select-dropdown";
-import axiosClient from "../../axios-client";
+import axiosClient from "../../utils/axios-client.js";
 import Loading from "../Loading";
 import { useDispatch, useSelector } from "react-redux";
 import { setLogin } from "../../state";
 import AsyncStorage from "@react-native-async-storage/async-storage";
 import { Entypo, Feather } from "@expo/vector-icons";
 
+const GENDER = ["male", "female", "others"];
+
 const SignUpOrLogIn = ({ goBack, phone, phoneExist }) => {
-  const { user } = useSelector((state) => state.state);
   const dispatch = useDispatch();
 
   const [passwordVisibility, setPasswordVisibility] = useState(true);
   const [rightIcon, setRightIcon] = useState("eye");
   const [info, setInfo] = useState("");
-  const [signupSuccess, setSignupSuccess] = useState(false);
+  const signupSuccess = useRef(false);
 
   const [userName, setUserName] = useState("");
   const [password, setPassword] = useState("");
@@ -45,7 +47,7 @@ const SignUpOrLogIn = ({ goBack, phone, phoneExist }) => {
           .then(({ data }) => {
             if (data?.message == "User created successfully") {
               setInfo("created successfully");
-              setSignupSuccess(true);
+              signupSuccess.current = true;
             }
           })
           .catch((error) => {
@@ -54,6 +56,7 @@ const SignUpOrLogIn = ({ goBack, phone, phoneExist }) => {
       }
 
       if ((!phoneExist && signupSuccess) || phoneExist) {
+        console.log("logging in");
         await axiosClient
           .post("/auth/login", {
             phoneNumber: phone,
@@ -61,11 +64,13 @@ const SignUpOrLogIn = ({ goBack, phone, phoneExist }) => {
           })
           .then(async ({ data }) => {
             if (data?.message == "Login successfully") {
-              dispatch(setLogin({ token: data.token, user: data.user }));
-
               const userjson = JSON.stringify(data.user);
               await AsyncStorage.setItem("CURRENT_USER", userjson);
               await AsyncStorage.setItem("ACCESS_TOKEN", data.token);
+
+              const token2 = await AsyncStorage.getItem("ACCESS_TOKEN");
+
+              dispatch(setLogin({ token: token2, user: data.user }));
 
               navigation.navigate("Home");
             } else {
@@ -81,6 +86,7 @@ const SignUpOrLogIn = ({ goBack, phone, phoneExist }) => {
 
     setIsloading(false);
   };
+
   const handlePasswordVisibility = () => {
     if (rightIcon === "eye") {
       setRightIcon("eye-off");
@@ -97,12 +103,14 @@ const SignUpOrLogIn = ({ goBack, phone, phoneExist }) => {
 
   return (
     <View className="flex-1 flex-col w-full items-center justify-center">
+      {/* back button */}
       <TouchableOpacity
         className="absolute left-5 top-20 z-10 "
         onPress={goBack}>
-        <Entypo name="back" size={30} color="black" />
+        <Entypo name="back" size={30} color="#551A8B" />
       </TouchableOpacity>
 
+      {/* infomation place */}
       {info && (
         <Text
           className={`text-start ${
@@ -111,62 +119,90 @@ const SignUpOrLogIn = ({ goBack, phone, phoneExist }) => {
           {info}
         </Text>
       )}
-      <View className="flex-col items-center justify-center bg-blue-400 max-h-fit py-5  px-3 rounded-3xl">
-        <Text className="text-3xl text-black font-bold mb-5 ">{phone}</Text>
 
+      {/* form */}
+      <KeyboardAvoidingView
+        behavior={Platform.OS == "ios" ? "padding" : undefined}
+        className="flex-col items-center justify-center w-full h-fit py-5  px-3 rounded-3xl">
+        <Text
+          className="text-3xl font-bold mb-5 "
+          style={{
+            color: "#C71585",
+          }}>
+          {phone}
+        </Text>
+
+        {/* username */}
         {!phoneExist && (
-          <View className="flex-row w-4/5 rounded-2xl bg-gray-200 px-2 py-1 my-1">
+          <KeyboardAvoidingView className="flex-row justify-between w-full rounded-full bg-gray-900 m-5 p-5">
+            <Text className="absolute -top-5 left-6 z-10 text-purple-800 font-bold text-3xl">
+              Username
+            </Text>
             <TextInput
-              className="flex-1 text-3xl"
-              placeholder="Username"
+              textAlign="center"
               onChangeText={(text) => {
                 setUserName(text);
               }}
+              className="text-3xl w-full"
+              style={{
+                color: "#C71585",
+              }}
             />
-          </View>
+          </KeyboardAvoidingView>
         )}
 
-        <View className="flex-row w-4/5 rounded-2xl bg-gray-200 px-2 py-1 my-1">
+        {/* password */}
+        <KeyboardAvoidingView className="flex-row justify-between w-full rounded-full bg-gray-900 m-5 py-5 px-5">
+          <Text className="absolute -top-5 left-6 z-10 text-purple-800 font-bold text-3xl">
+            Password
+          </Text>
           <TextInput
-            className="flex-1 text-3xl"
+            textAlign="center"
             secureTextEntry={passwordVisibility}
-            textContentType="password"
-            placeholder="Password"
             onChangeText={(text) => setPassword(text)}
+            className="text-3xl  flex-1"
+            style={{
+              color: "#C71585",
+            }}
           />
           <Pressable
             onPress={handlePasswordVisibility}
             className="items-center justify-center">
             {rightIcon == "eye" ? (
-              <Feather name="eye-off" size={30} color="black" />
+              <Feather name="eye-off" size={30} color="#C71585" />
             ) : (
-              <Feather name="eye" size={30} color="black" />
+              <Feather name="eye" size={30} color="#C71585" />
             )}
           </Pressable>
-        </View>
+        </KeyboardAvoidingView>
 
+        {/* gender */}
         {!phoneExist && (
-          <SelectDropdown
-            data={["male", "female", "others"]}
-            onSelect={(selectedItem, index) => {
-              console.log(selectedItem, index);
-              setGender(selectedItem);
-            }}
-            buttonTextAfterSelection={(selectedItem, index) => {
-              // text represented after item is selected
-              // if data array is an array of objects then return selectedItem.property to render after item is selected
-              return selectedItem;
-            }}
-            rowTextForSelection={(item, index) => {
-              // text represented for each item in dropdown
-              // if data array is an array of objects then return item.property to represent item in dropdown
-              return item;
-            }}
-          />
+          <View className="flex-row justify-between w-full rounded-full bg-gray-900 m-5 py-5 px-5">
+            <Text className="absolute -top-5 left-6 z-10 text-purple-800 font-bold text-3xl">
+              Gender
+            </Text>
+            <View className="text-2xl text-white flex-row justify-between items-center w-full">
+              {GENDER.map((g) => (
+                <TouchableOpacity
+                  key={g}
+                  className="px-5 py-2 rounded-3xl bg-black border-4 mx-1"
+                  onPress={() => {
+                    setGender(g);
+                  }}
+                  style={{
+                    borderColor: `${gender == g ? "#C71585" : "#8B7B8B"}`,
+                  }}>
+                  <Text className="text-xl text-white">{g}</Text>
+                </TouchableOpacity>
+              ))}
+            </View>
+          </View>
         )}
 
+        {/* submit button */}
         <TouchableOpacity
-          className=" items-center justify-center rounded-2xl mt-2 bg-green-500 py-2 px-4 max-h-12"
+          className="items-center justify-center rounded-2xl mt-2 mb-16 bg-purple-800 py-2 px-4 max-h-12"
           onPress={handleLogin}>
           {!isloading ? (
             phoneExist ? (
@@ -175,10 +211,10 @@ const SignUpOrLogIn = ({ goBack, phone, phoneExist }) => {
               <Text className="text-2xl">Register</Text>
             )
           ) : (
-            <Loading color={"#000000"} />
+            <Loading color={"#DDC488"} size={30} />
           )}
         </TouchableOpacity>
-      </View>
+      </KeyboardAvoidingView>
     </View>
   );
 };

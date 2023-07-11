@@ -2,15 +2,23 @@ import mongoose from "mongoose";
 
 const messageSchema = new mongoose.Schema(
   {
-    text: {
-      type: String,
-      required: true,
-    },
     senderId: {
       type: String,
       required: true,
     },
-    picture: String,
+    type: {
+      type: String,
+      enum: ["text", "picture", "emoji"],
+      default: "text",
+      required: true,
+    },
+    content: {
+      pictureUrl: String,
+      text: {
+        type: String,
+        required: true,
+      },
+    },
   },
   { timestamps: true }
 );
