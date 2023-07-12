@@ -1,11 +1,4 @@
-import {
-  View,
-  Text,
-  Image,
-  TouchableOpacity,
-  ScrollView,
-  TextInput,
-} from "react-native";
+import { View, Text, Image, TouchableOpacity, ScrollView } from "react-native";
 import { SafeAreaView } from "react-native-safe-area-context";
 import React, { useEffect, useState } from "react";
 import { useNavigation } from "@react-navigation/native";
@@ -26,8 +19,6 @@ const MessageRoomScreen = ({ route }) => {
   const [showEachRoom, setShowEachRoom] = useState(false);
   const [roomIndex, setRoomIndex] = useState(0);
 
-  console.log(messageRoom);
-
   useEffect(() => {
     const fetchMessageRooms = async () => {
       try {
@@ -36,7 +27,6 @@ const MessageRoomScreen = ({ route }) => {
           .then(({ data }) => {
             let found = false;
             if (otherId) {
-              console.log("messaging to: " + otherId);
               for (let i = 0; i < data.length; i++) {
                 if (data[i]?.users[0]._id == otherId) {
                   found = true;

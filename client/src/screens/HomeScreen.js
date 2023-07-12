@@ -6,38 +6,28 @@ import {
   Image,
   SafeAreaView,
   Platform,
-  Button,
   Dimensions,
   KeyboardAvoidingView,
-  TextInput,
-  ScrollView,
-  Modal,
 } from "react-native";
 import { useNavigation } from "@react-navigation/native";
 import { useDispatch, useSelector } from "react-redux";
-import AsyncStorage from "@react-native-async-storage/async-storage";
 import {
   Feather,
   FontAwesome,
   FontAwesome5,
   Ionicons,
-  MaterialCommunityIcons,
 } from "@expo/vector-icons";
 import * as TaskManager from "expo-task-manager";
 import * as Location from "expo-location";
 import SwiperFlatList from "react-native-swiper-flatlist";
-import { io } from "socket.io-client";
-import Constants from "expo-constants";
+import { Camera } from "expo-camera";
+import MapView from "react-native-maps";
 
 import { Map, PictureCard } from "../components";
 import { setLogin, setUserFriends } from "../state";
 import socket from "../utils/socket";
 import axiosClient, { clearAxiosCache } from "../utils/axios-client.js";
-import MapView from "react-native-maps";
 import CameraComponent from "../components/home/CameraComponent";
-import { Camera } from "expo-camera";
-import { FlatList } from "react-native-gesture-handler";
-import { formatDateTime, formatTime } from "../utils";
 
 const LOCATION_TASK_NAME = "background-location-task";
 
@@ -85,7 +75,7 @@ const HomeScreen = () => {
   useEffect(() => {
     const forcusUserLocation = async () => {
       const location = await getLocation();
-      // console.log(location);
+
       setCurrentLocation(location);
       mapRef.current?.animateToRegion(
         { ...location, latitude: location.latitude - 0.005 },
@@ -151,18 +141,14 @@ const HomeScreen = () => {
 
   useEffect(() => {
     const handleReceivePicture = (updatedPicture) => {
-      console.log("updating new pic");
       setData((prevPictures) => [updatedPicture, ...prevPictures]);
     };
 
     const handleDeletePicture = (pictureId) => {
-      console.log("deleting pic");
       setData(data.filter((pic) => pic._id !== pictureId));
     };
 
     const handleUpdatePicture = (updatedPicture) => {
-      console.log("updating pic");
-
       setData((prevPictures) =>
         prevPictures.map((picture) => {
           if (picture._id === updatedPicture._id) {
@@ -248,7 +234,6 @@ const HomeScreen = () => {
       const { status: backgroundStatus } =
         await Location.requestBackgroundPermissionsAsync();
       if (backgroundStatus === "granted") {
-        console.log("granted");
         setIsLocationPermissed(true);
         await Location.startLocationUpdatesAsync(LOCATION_TASK_NAME, {
           accuracy: Location.Accuracy.Balanced,

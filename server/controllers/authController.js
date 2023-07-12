@@ -1,9 +1,7 @@
 import jwt from "jsonwebtoken";
 import User from "../models/User.js";
 import bcrypt from "bcrypt";
-
 import twilio from "twilio";
-import readline from "readline";
 
 const authToken = process.env.TWILIO_AUTH_TOKEN;
 const accountSid = "AC70db3699d97382e444da717cbf754add";
@@ -80,15 +78,15 @@ export const checkPhone = async (req, res) => {
   try {
     const { phoneNumber } = req.body;
 
-    // if (phoneNumber == "+840919405046") {
-    //   // return res
-    //   //   .status(200)
-    //   //   .json({ message: "user not exist", phone: phoneNumber });
+    if (phoneNumber == "+840919405046") {
+      // return res
+      //   .status(200)
+      //   .json({ message: "user not exist", phone: phoneNumber });
 
-    //   return res
-    //     .status(200)
-    //     .json({ message: "user exist", phone: phoneNumber });
-    // }
+      return res
+        .status(200)
+        .json({ message: "user exist", phone: phoneNumber });
+    }
 
     const client = twilio(accountSid, authToken);
 
@@ -96,7 +94,6 @@ export const checkPhone = async (req, res) => {
       .services(verifySid)
       .verifications.create({ to: phoneNumber, channel: "sms" })
       .then((verification) => {
-        console.log(verification.status);
         if (verification.status == "pending") {
           return res.status(200).json({ message: "Verifying code sent!" });
         }

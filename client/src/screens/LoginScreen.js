@@ -1,10 +1,10 @@
-import { View, Text } from "react-native";
 import React, { useEffect, useState } from "react";
 import { SafeAreaView } from "react-native";
-import { CheckPhone, SignUpOrLogIn } from "../components";
 import { useNavigation } from "@react-navigation/native";
 import { useDispatch, useSelector } from "react-redux";
 import AsyncStorage from "@react-native-async-storage/async-storage";
+
+import { CheckPhone, SignUpOrLogIn } from "../components";
 import { setLogin } from "../state";
 
 const LoginScreen = () => {

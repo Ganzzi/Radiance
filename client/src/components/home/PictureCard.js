@@ -14,14 +14,14 @@ import {
   FontAwesome5,
   MaterialCommunityIcons,
 } from "@expo/vector-icons";
+import SwiperFlatList from "react-native-swiper-flatlist";
+import { useNavigation } from "@react-navigation/native";
 
 import axiosClient from "../../utils/axios-client.js";
 import { formatDateTime, formatTime } from "../../utils";
 import { REACTIONS } from "../../constants";
-import SwiperFlatList from "react-native-swiper-flatlist";
 import Pagination from "./Pagination";
 import socket from "../../utils/socket";
-import { useNavigation } from "@react-navigation/native";
 
 const PictureCard = ({ user, width, item, data, setData }) => {
   const navigation = useNavigation();

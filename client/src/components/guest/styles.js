@@ -1,4 +1,4 @@
-import { StyleSheet, Platform } from "react-native";
+import { StyleSheet } from "react-native";
 
 export const CELL_SIZE = 45;
 export const CELL_BORDER_RADIUS = 8;

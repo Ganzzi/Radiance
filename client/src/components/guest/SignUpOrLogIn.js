@@ -7,15 +7,15 @@ import {
   KeyboardAvoidingView,
   Platform,
 } from "react-native";
-import React, { useEffect, useRef, useState } from "react";
+import React, { useRef, useState } from "react";
 import { useNavigation } from "@react-navigation/native";
-import SelectDropdown from "react-native-select-dropdown";
-import axiosClient from "../../utils/axios-client.js";
-import Loading from "../Loading";
-import { useDispatch, useSelector } from "react-redux";
-import { setLogin } from "../../state";
+import { useDispatch } from "react-redux";
 import AsyncStorage from "@react-native-async-storage/async-storage";
 import { Entypo, Feather } from "@expo/vector-icons";
+
+import axiosClient from "../../utils/axios-client.js";
+import Loading from "../Loading";
+import { setLogin } from "../../state";
 
 const GENDER = ["male", "female", "others"];
 
@@ -56,7 +56,6 @@ const SignUpOrLogIn = ({ goBack, phone, phoneExist }) => {
       }
 
       if ((!phoneExist && signupSuccess) || phoneExist) {
-        console.log("logging in");
         await axiosClient
           .post("/auth/login", {
             phoneNumber: phone,
@@ -75,7 +74,6 @@ const SignUpOrLogIn = ({ goBack, phone, phoneExist }) => {
               navigation.navigate("Home");
             } else {
               setInfo(data?.message);
-              console.log(data?.message);
             }
           })
           .catch((e) => {

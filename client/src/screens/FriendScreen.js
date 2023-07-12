@@ -1,17 +1,11 @@
-import {
-  View,
-  Text,
-  TouchableOpacity,
-  TextInput,
-  Image,
-  ScrollView,
-} from "react-native";
+import { View, TouchableOpacity, TextInput, ScrollView } from "react-native";
 import React, { useEffect, useState } from "react";
 import { useNavigation } from "@react-navigation/native";
 import { SafeAreaView } from "react-native-safe-area-context";
-import axiosClient from "../utils/axios-client.js";
 import { useDispatch, useSelector } from "react-redux";
 import { FontAwesome, Ionicons } from "@expo/vector-icons";
+
+import axiosClient from "../utils/axios-client.js";
 import { ListWidget, SearchResutl } from "../components";
 import { setUserFriends } from "../state";
 import socket from "../utils/socket";
@@ -219,7 +213,6 @@ const FriendScreen = () => {
             searchResult={searchResult}
             user={user}
             onUpdate={async (type) => {
-              // console.log(type + " update");
               switch (type) {
                 case "remove":
                   await handleRemoveFriendSuccess();

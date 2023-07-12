@@ -1,11 +1,6 @@
 import { View, Text, TouchableOpacity, Image } from "react-native";
 import React from "react";
-import {
-  AntDesign,
-  FontAwesome,
-  Ionicons,
-  MaterialIcons,
-} from "@expo/vector-icons";
+
 import Button from "./Button";
 
 const SearchResutl = ({ searchResult, user, onUpdate }) => {

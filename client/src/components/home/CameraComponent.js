@@ -1,10 +1,7 @@
 import React, { useRef, useState } from "react";
 import {
   View,
-  Button,
-  StyleSheet,
   TouchableOpacity,
-  Text,
   Image,
   Dimensions,
   TextInput,
@@ -19,13 +16,8 @@ import {
   SimpleLineIcons,
 } from "@expo/vector-icons";
 import * as ImageManipulator from "expo-image-manipulator";
-import {
-  PanGestureHandler,
-  State,
-  PinchGestureHandler,
-} from "react-native-gesture-handler";
+import { PinchGestureHandler } from "react-native-gesture-handler";
 
-import axiosClient from "../../utils/axios-client.js";
 import Loading from "../Loading";
 
 const windowWidth = Dimensions.get("window").width;
@@ -60,7 +52,6 @@ const CameraComponent = ({ onClose, onCreate }) => {
   const takePicture = async () => {
     if (cameraRef.current) {
       const { uri } = await cameraRef.current.takePictureAsync();
-      // console.log("Photo captured:", uri);
 
       if (uri) {
         // Resize the image

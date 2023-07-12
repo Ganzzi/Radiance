@@ -1,13 +1,8 @@
 import { View, Text, TouchableOpacity, Image } from "react-native";
 import React from "react";
-import {
-  AntDesign,
-  FontAwesome,
-  Ionicons,
-  MaterialIcons,
-} from "@expo/vector-icons";
-import Button from "./Button";
 import { useNavigation } from "@react-navigation/native";
+
+import Button from "./Button";
 
 const ListWidget = ({ data, state, onUpdate, user }) => {
   const navigation = useNavigation();
@@ -25,7 +20,6 @@ const ListWidget = ({ data, state, onUpdate, user }) => {
                 <TouchableOpacity
                   className=" flex-row justify-start items-start space-x-2"
                   onPress={() => {
-                    console.log("navigating..");
                     navigation.navigate("Profile", {
                       otherId: item._id,
                     });

@@ -3,21 +3,19 @@ import {
   Text,
   SafeAreaView,
   TouchableOpacity,
-  StyleSheet,
   Animated,
   Dimensions,
   KeyboardAvoidingView,
 } from "react-native";
 import React, { useState, useRef } from "react";
-import { useNavigation } from "@react-navigation/native";
 import {
   CodeField,
   Cursor,
   useBlurOnFulfill,
-  useClearByFocusCell,
 } from "react-native-confirmation-code-field";
 import { Entypo, MaterialCommunityIcons } from "@expo/vector-icons";
 import PhoneInput from "react-native-phone-number-input";
+import { useDispatch } from "react-redux";
 
 import styles, {
   ACTIVE_CELL_BG_COLOR,
@@ -28,7 +26,6 @@ import styles, {
 } from "./styles";
 import Loading from "../Loading";
 import axiosClient from "../../utils/axios-client.js";
-import { useDispatch } from "react-redux";
 
 const { Value, Text: AnimatedText, View: AnimatedView } = Animated;
 
@@ -100,7 +97,6 @@ const CheckPhone = ({
 
   const handleVerifyCode = async () => {
     setIsLoading(true);
-    console.log(verifyingCode);
     await axiosClient
       .post("/auth/verifycode", {
         phoneNumber: formattedValue,

@@ -9,8 +9,9 @@ import {
   Platform,
 } from "react-native";
 import React, { useEffect, useRef } from "react";
-import { AntDesign, MaterialCommunityIcons } from "@expo/vector-icons";
+import { AntDesign } from "@expo/vector-icons";
 import { useState } from "react";
+
 import axiosClient from "../../utils/axios-client.js";
 import { useSelector } from "react-redux";
 import socket from "../../utils/socket";
@@ -26,7 +27,6 @@ const Messages = ({ messageRoom, setShowEachRoom, setMessageRoom }) => {
       if (data.from == messageRoom.users[0]._id) {
         const updatedMessages = [...messageRoom.messages, data.msg];
 
-        console.log("mes");
         setMessageRoom({ ...messageRoom, messages: updatedMessages });
       }
     };

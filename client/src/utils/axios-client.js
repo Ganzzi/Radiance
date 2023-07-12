@@ -2,9 +2,10 @@ import AsyncStorage from "@react-native-async-storage/async-storage";
 import axios from "axios";
 import { Platform } from "react-native";
 
-import { BASE_URL_ANDROID, BASE_URL } from "../constants";
+import { BASE_URL_IOS_EXPO_GO, BASE_URL_ANDROID, BASE_URL } from "@env";
 
-const url = Platform.OS == "android" ? BASE_URL_ANDROID : BASE_URL;
+// const url = Platform.OS == "android" ? BASE_URL_ANDROID : BASE_URL_IOS_EXPO_GO;
+const url = BASE_URL;
 
 const axiosClient = axios.create({
   baseURL: url,

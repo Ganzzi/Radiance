@@ -106,8 +106,6 @@ const UpdateProfileModal = ({ user, onClose, onUpdate }) => {
 
       console.log(base64Img);
 
-      // console.log(base64Img);
-
       handleInputChange("photo", base64Img);
     }
   };

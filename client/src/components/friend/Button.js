@@ -1,15 +1,11 @@
-import { Text, TouchableOpacity } from "react-native";
+import { TouchableOpacity } from "react-native";
 import React, { useState } from "react";
-import {
-  AntDesign,
-  FontAwesome,
-  Ionicons,
-  MaterialIcons,
-} from "@expo/vector-icons";
+import { AntDesign, Ionicons, MaterialIcons } from "@expo/vector-icons";
+import { useNavigation } from "@react-navigation/native";
+
 import Loading from "../Loading";
 import axiosClient from "../../utils/axios-client.js";
 import socket from "../../utils/socket";
-import { useNavigation } from "@react-navigation/native";
 
 const Button = ({ state, onUpdate, item, user }) => {
   const [isLoading, setIsLoading] = useState(false);
@@ -46,7 +42,6 @@ const Button = ({ state, onUpdate, item, user }) => {
         })
         .then(async (response) => {
           if (response.status === 200) {
-            // console.log("success");
             await onUpdate(type);
             socket.emit("accept-delete-request", {
               from: user._id,
@@ -68,7 +63,6 @@ const Button = ({ state, onUpdate, item, user }) => {
         .patch(`/user/${user._id}/${friendId}/removeFriend`)
         .then(async (response) => {
           if (response.status === 200) {
-            // console.log("success");
             await onUpdate(type);
             socket.emit("remove-friend", {
               from: user._id,

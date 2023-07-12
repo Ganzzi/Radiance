@@ -1,4 +1,5 @@
 import { Server } from "socket.io";
+
 import User from "../models/User.js";
 
 export const connectSocket = (server) => {
@@ -126,15 +127,12 @@ export const connectSocket = (server) => {
       const user = await User.findById(data.from);
       const friendIds = user.friendIds;
 
-      console.log(friendIds);
-
       // Iterate over the friend IDs
       friendIds.forEach((friendId) => {
         const senderSocket = onlineUsers.get(friendId);
 
         if (senderSocket) {
           socket.to(senderSocket).emit("picture-deleted", data.pictureId);
-          // console.log("emited....................................");
         }
       });
     });
